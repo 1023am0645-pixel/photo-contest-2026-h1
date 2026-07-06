@@ -137,9 +137,41 @@ begin
 end;
 $$;
 
+create or replace function public.change_photo_event_admin_code(
+    p_current_admin_code text,
+    p_new_admin_code text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    if not public.verify_photo_event_admin(p_current_admin_code) then
+        raise exception 'invalid admin code';
+    end if;
+
+    if length(trim(coalesce(p_new_admin_code, ''))) < 4 then
+        raise exception 'new admin code must be at least 4 characters';
+    end if;
+
+    update public.photo_event_settings
+    set value = trim(p_new_admin_code)
+    where key = 'admin_code';
+
+    if not found then
+        insert into public.photo_event_settings (key, value)
+        values ('admin_code', trim(p_new_admin_code));
+    end if;
+
+    return true;
+end;
+$$;
+
 grant execute on function public.verify_photo_event_admin(text) to anon;
 grant execute on function public.set_photo_event_review(uuid, integer, boolean, text) to anon;
 grant execute on function public.delete_photo_event_submission(uuid, text) to anon;
+grant execute on function public.change_photo_event_admin_code(text, text) to anon;
 
 do $$
 begin
