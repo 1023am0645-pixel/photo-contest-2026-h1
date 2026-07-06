@@ -24,7 +24,9 @@ body {
 }
 
 button,
-input {
+input,
+textarea,
+select {
     font: inherit;
 }
 
@@ -269,6 +271,20 @@ body.page-admin {
     color: rgba(100, 50, 100, 0.5);
 }
 
+.watermark {
+    display: grid;
+    gap: 0.18rem;
+    margin-top: 0.7rem;
+    color: rgba(100, 50, 100, 0.46);
+    line-height: 1.4;
+}
+
+.watermark-brand {
+    font-family: 'Jua', sans-serif;
+    color: rgba(124, 58, 237, 0.58);
+    letter-spacing: 0.08em;
+}
+
 .upload-screen {
     min-height: 100vh;
     padding: 2rem 1rem;
@@ -289,7 +305,7 @@ body.page-admin {
 }
 
 .upload-title {
-    font-family: 'Gaegu', cursive;
+    font-family: 'Jua', sans-serif;
     font-size: clamp(1.8rem, 8vw, 2.8rem);
     white-space: nowrap;
     color: var(--upload-primary-light);
@@ -359,7 +375,8 @@ body.page-admin {
     z-index: 10;
 }
 
-.upload-container input[type="text"] {
+.upload-container input[type="text"],
+.upload-container textarea {
     width: 100%;
     padding: 1.2rem;
     border-radius: 15px;
@@ -372,9 +389,11 @@ body.page-admin {
     outline: none;
     transition: all 0.3s;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02);
+    resize: vertical;
 }
 
-.upload-container input[type="text"]:focus {
+.upload-container input[type="text"]:focus,
+.upload-container textarea:focus {
     border-color: var(--upload-primary);
     box-shadow: 0 0 15px rgba(251, 111, 146, 0.2);
     background: #fff;
@@ -392,7 +411,7 @@ body.page-admin {
     cursor: pointer;
     transition: all 0.3s;
     box-shadow: 0 10px 20px rgba(251, 111, 146, 0.3);
-    font-family: 'Gaegu', cursive;
+    font-family: 'Jua', sans-serif;
 }
 
 .submit-btn:hover {
@@ -424,7 +443,7 @@ body.page-admin {
 }
 
 .admin-title {
-    font-family: 'Gaegu', cursive;
+    font-family: 'Jua', sans-serif;
     font-size: 2.5rem;
     color: var(--admin-primary);
     letter-spacing: 0;
@@ -433,6 +452,8 @@ body.page-admin {
 .admin-actions {
     display: flex;
     gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .admin-btn {
@@ -441,7 +462,9 @@ body.page-admin {
     border: none;
     padding: 10px 20px;
     border-radius: 50px;
-    font-weight: 700;
+    font-family: 'Jua', sans-serif;
+    font-weight: 400;
+    white-space: nowrap;
 }
 
 .dashboard {
@@ -472,10 +495,54 @@ body.page-admin {
 
 .stat-copy {
     color: #888;
+    line-height: 1.7;
+}
+
+.stat-copy strong {
+    color: var(--admin-primary);
 }
 
 .chart-container {
     height: 250px;
+}
+
+.admin-tools {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 180px;
+    gap: 0.8rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.admin-search {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: white;
+    border-radius: 50px;
+    padding: 0.7rem 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    color: var(--admin-primary);
+}
+
+.admin-search input,
+.admin-tools select {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--admin-text);
+    font-weight: 700;
+}
+
+.admin-tools select {
+    height: 46px;
+    padding: 0 1rem;
+    border-radius: 50px;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    font-family: 'Jua', sans-serif;
+    appearance: none;
 }
 
 .filter-tabs {
@@ -491,7 +558,8 @@ body.page-admin {
     background: white;
     border-radius: 50px;
     cursor: pointer;
-    font-weight: 700;
+    font-family: 'Jua', sans-serif;
+    font-weight: 400;
     transition: all 0.3s;
     white-space: nowrap;
     border: 2px solid transparent;
@@ -555,7 +623,7 @@ body.page-admin {
 }
 
 .uploader-name {
-    font-family: 'Gaegu', cursive;
+    font-family: 'Jua', sans-serif;
     font-size: 1.6rem;
     color: var(--admin-primary);
     word-break: break-word;
@@ -652,7 +720,7 @@ body.page-admin {
     border: 1px solid rgba(255, 255, 255, 0.8);
     padding: 10px 15px;
     border-radius: 20px;
-    font-family: inherit;
+    font-family: 'Jua', sans-serif;
     font-size: 0.95rem;
     color: var(--admin-text);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -734,6 +802,10 @@ body.page-upload .nav-btn {
     transition: border-color 0.2s;
 }
 
+.password-modal input {
+    letter-spacing: 0;
+}
+
 .modal input:focus {
     border-color: #8b5cf6;
 }
@@ -813,6 +885,14 @@ body.page-upload .nav-btn {
         padding: 1.2rem 1.4rem;
     }
 
+    .admin-actions {
+        justify-content: flex-start;
+    }
+
+    .admin-tools {
+        grid-template-columns: 1fr;
+    }
+
     .admin-title {
         font-size: 2rem;
     }
@@ -857,6 +937,7 @@ body.page-upload .nav-btn {
 
     .admin-btn {
         flex: 1;
+        padding-inline: 12px;
     }
 
     .floating-nav {
