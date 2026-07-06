@@ -15,6 +15,8 @@ const state = {
     photos: [],
     adminCode: "",
     filter: "all",
+    search: "",
+    sort: "default",
     channel: null,
     chart: null
 };
@@ -40,11 +42,26 @@ const els = {
     adminError: document.getElementById("adminError"),
     closeAdminModal: document.getElementById("closeAdminModal"),
     confirmAdmin: document.getElementById("confirmAdmin"),
+    passwordModal: document.getElementById("passwordModal"),
+    openPasswordBtn: document.getElementById("openPasswordBtn"),
+    closePasswordModal: document.getElementById("closePasswordModal"),
+    savePasswordBtn: document.getElementById("savePasswordBtn"),
+    currentAdminPw: document.getElementById("currentAdminPw"),
+    newAdminPw: document.getElementById("newAdminPw"),
+    confirmNewAdminPw: document.getElementById("confirmNewAdminPw"),
+    passwordError: document.getElementById("passwordError"),
+    copyLinkBtn: document.getElementById("copyLinkBtn"),
+    exportCsvBtn: document.getElementById("exportCsvBtn"),
+    adminSearch: document.getElementById("adminSearch"),
+    sortSelect: document.getElementById("sortSelect"),
     refreshBtn: document.getElementById("refreshBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
     filters: document.getElementById("filters"),
     gallery: document.getElementById("gallery"),
     totalCount: document.getElementById("totalCount"),
+    winnerCount: document.getElementById("winnerCount"),
+    latestUpload: document.getElementById("latestUpload"),
+    winnerFilterCount: document.getElementById("winnerFilterCount"),
     ratingCounts: {
         0: document.getElementById("count0"),
         1: document.getElementById("count1"),
@@ -100,6 +117,23 @@ function closeAdminModal() {
     els.adminError.style.display = "none";
 }
 
+function openPasswordModal() {
+    els.passwordError.style.display = "none";
+    els.currentAdminPw.value = state.adminCode;
+    els.newAdminPw.value = "";
+    els.confirmNewAdminPw.value = "";
+    els.passwordModal.classList.add("open");
+    setTimeout(() => els.newAdminPw.focus(), 100);
+}
+
+function closePasswordModal() {
+    els.passwordModal.classList.remove("open");
+    els.passwordError.style.display = "none";
+    els.currentAdminPw.value = "";
+    els.newAdminPw.value = "";
+    els.confirmNewAdminPw.value = "";
+}
+
 function setBusy(button, busy, label) {
     button.disabled = busy;
     if (busy) {
@@ -149,10 +183,16 @@ els.closeAdminModal.addEventListener("click", closeAdminModal);
 els.adminModal.addEventListener("click", (event) => {
     if (event.target === els.adminModal) closeAdminModal();
 });
+els.closePasswordModal.addEventListener("click", closePasswordModal);
+els.passwordModal.addEventListener("click", (event) => {
+    if (event.target === els.passwordModal) closePasswordModal();
+});
 els.adminPw.addEventListener("keydown", (event) => {
     if (event.key === "Enter") verifyAdmin();
 });
 els.confirmAdmin.addEventListener("click", verifyAdmin);
+els.openPasswordBtn.addEventListener("click", openPasswordModal);
+els.savePasswordBtn.addEventListener("click", changeAdminPassword);
 els.uploadBox.addEventListener("click", () => els.photoInput.click());
 
 els.photoInput.addEventListener("change", () => {
@@ -332,13 +372,54 @@ els.refreshBtn.addEventListener("click", () => {
     });
 });
 
+els.copyLinkBtn.addEventListener("click", async () => {
+    const link = `${window.location.origin}${window.location.pathname}`;
+    try {
+        await navigator.clipboard.writeText(link);
+        await alertPopup({
+            title: "복사 완료! 🔗",
+            text: "참여자에게 보낼 링크가 복사되었습니다.",
+            icon: "success",
+            confirmButtonColor: "#8b5cf6"
+        });
+    } catch (error) {
+        console.error(error);
+        await alertPopup({
+            title: "참여 링크",
+            text: link,
+            icon: "info",
+            confirmButtonColor: "#8b5cf6"
+        });
+    }
+});
+
+els.exportCsvBtn.addEventListener("click", () => {
+    exportCsv(filteredPhotos());
+});
+
+els.adminSearch.addEventListener("input", () => {
+    state.search = els.adminSearch.value.trim().toLowerCase();
+    renderGallery();
+});
+
+els.sortSelect.addEventListener("change", () => {
+    state.sort = els.sortSelect.value;
+    renderGallery();
+});
+
 els.logoutBtn.addEventListener("click", () => {
     state.adminCode = "";
     state.photos = [];
+    state.search = "";
+    state.sort = "default";
+    state.filter = "all";
     if (state.channel) {
         state.client.removeChannel(state.channel);
         state.channel = null;
     }
+    els.adminSearch.value = "";
+    els.sortSelect.value = "default";
+    document.querySelectorAll(".filter-tab").forEach((item) => item.classList.toggle("active", item.dataset.filter === "all"));
     showScreen("home");
 });
 
@@ -444,12 +525,20 @@ function subscribeRealtime() {
 
 function renderStats() {
     const counts = [0, 0, 0, 0, 0, 0];
+    const winnerCount = state.photos.filter((photo) => photo.is_winner).length;
     state.photos.forEach((photo) => {
         const rating = Number(photo.rating || 0);
         if (rating >= 0 && rating <= 5) counts[rating] += 1;
     });
 
     els.totalCount.textContent = String(state.photos.length);
+    els.winnerCount.textContent = String(winnerCount);
+    els.winnerFilterCount.textContent = String(winnerCount);
+    const latestPhoto = state.photos.reduce((latest, photo) => {
+        if (!latest) return photo;
+        return new Date(photo.created_at) > new Date(latest.created_at) ? photo : latest;
+    }, null);
+    els.latestUpload.textContent = latestPhoto ? formatDate(latestPhoto.created_at) : "-";
     counts.forEach((count, rating) => {
         els.ratingCounts[rating].textContent = String(count);
     });
@@ -499,8 +588,37 @@ function renderChart(counts) {
 }
 
 function filteredPhotos() {
-    if (state.filter === "all") return state.photos;
-    return state.photos.filter((photo) => Number(photo.rating) === Number(state.filter));
+    let photos = [...state.photos];
+
+    if (state.filter === "winner") {
+        photos = photos.filter((photo) => photo.is_winner);
+    } else if (state.filter !== "all") {
+        photos = photos.filter((photo) => Number(photo.rating) === Number(state.filter));
+    }
+
+    if (state.search) {
+        photos = photos.filter((photo) => {
+            const target = `${photo.uploader_name || ""} ${photo.message || ""}`.toLowerCase();
+            return target.includes(state.search);
+        });
+    }
+
+    photos.sort((a, b) => {
+        if (state.sort === "latest") {
+            return new Date(b.created_at) - new Date(a.created_at);
+        }
+        if (state.sort === "rating") {
+            return Number(b.rating || 0) - Number(a.rating || 0) || new Date(b.created_at) - new Date(a.created_at);
+        }
+        if (state.sort === "name") {
+            return String(a.uploader_name || "").localeCompare(String(b.uploader_name || ""), "ko");
+        }
+        return Number(b.is_winner) - Number(a.is_winner) ||
+            Number(b.rating || 0) - Number(a.rating || 0) ||
+            new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    return photos;
 }
 
 function renderGallery() {
@@ -542,6 +660,58 @@ function renderGallery() {
     }).join("");
 }
 
+async function changeAdminPassword() {
+    const currentCode = els.currentAdminPw.value.trim();
+    const newCode = els.newAdminPw.value.trim();
+    const confirmCode = els.confirmNewAdminPw.value.trim();
+
+    if (!currentCode || !newCode || !confirmCode) {
+        els.passwordError.textContent = "⚠️ 모든 칸을 입력해 주세요";
+        els.passwordError.style.display = "block";
+        return;
+    }
+
+    if (newCode.length < 4) {
+        els.passwordError.textContent = "⚠️ 새 비밀번호는 4자리 이상으로 입력해 주세요";
+        els.passwordError.style.display = "block";
+        return;
+    }
+
+    if (newCode !== confirmCode) {
+        els.passwordError.textContent = "⚠️ 새 비밀번호가 서로 다릅니다";
+        els.passwordError.style.display = "block";
+        return;
+    }
+
+    setBusy(els.savePasswordBtn, true, "변경 중...");
+
+    try {
+        const { data, error } = await state.client.rpc("change_photo_event_admin_code", {
+            p_current_admin_code: currentCode,
+            p_new_admin_code: newCode
+        });
+
+        if (error || data !== true) {
+            throw error || new Error("password change failed");
+        }
+
+        state.adminCode = newCode;
+        closePasswordModal();
+        await alertPopup({
+            title: "변경 완료! 🔑",
+            text: "다음 관리자 로그인부터 새 비밀번호를 사용하면 됩니다.",
+            icon: "success",
+            confirmButtonColor: "#8b5cf6"
+        });
+    } catch (error) {
+        console.error(error);
+        els.passwordError.textContent = "⚠️ 현재 비밀번호를 확인해 주세요";
+        els.passwordError.style.display = "block";
+    } finally {
+        setBusy(els.savePasswordBtn, false);
+    }
+}
+
 async function saveReview(id, rating, isWinner) {
     const { error } = await state.client.rpc("set_photo_event_review", {
         p_id: id,
@@ -551,6 +721,45 @@ async function saveReview(id, rating, isWinner) {
     });
 
     if (error) throw error;
+}
+
+function exportCsv(photos) {
+    if (!photos.length) {
+        alertPopup({
+            title: "저장할 사진이 없습니다",
+            text: "현재 조건에 맞는 사진이 없습니다.",
+            icon: "info",
+            confirmButtonColor: "#8b5cf6"
+        });
+        return;
+    }
+
+    const rows = [
+        ["닉네임", "메세지", "별점", "베스트샷", "접수시간", "사진URL"],
+        ...photos.map((photo) => [
+            photo.uploader_name || "",
+            photo.message || "",
+            String(photo.rating || 0),
+            photo.is_winner ? "Y" : "N",
+            formatDate(photo.created_at),
+            publicUrl(photo.file_path)
+        ])
+    ];
+
+    const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `강사찍사대회_접수목록_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function csvCell(value) {
+    return `"${String(value).replaceAll('"', '""')}"`;
 }
 
 function formatDate(value) {
