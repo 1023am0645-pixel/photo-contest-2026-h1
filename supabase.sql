@@ -120,27 +120,18 @@ create or replace function public.delete_photo_event_submission(
 returns boolean
 language plpgsql
 security definer
-set search_path = public, storage
+set search_path = public
 as $$
-declare
-    target_path text;
 begin
     if not public.verify_photo_event_admin(p_admin_code) then
         raise exception 'invalid admin code';
     end if;
 
-    select file_path into target_path
-    from public.photo_event_2026_h1
-    where id = p_id;
+    delete from public.photo_event_2026_h1 where id = p_id;
 
-    if target_path is null then
+    if not found then
         raise exception 'photo not found';
     end if;
-
-    delete from public.photo_event_2026_h1 where id = p_id;
-    delete from storage.objects
-    where bucket_id = 'photo-contest-2026-h1'
-      and name = target_path;
 
     return true;
 end;
