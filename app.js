@@ -250,7 +250,7 @@ els.uploadForm.addEventListener("submit", async (event) => {
     if (!state.file) {
         await alertPopup({
             title: "사진을 선택해주세요",
-            text: "사진을 선택하거나 촬영한 뒤 전송해 주세요.",
+            text: "촬영한 사진을 업로드한 뒤 전송해 주세요.",
             icon: "warning",
             confirmButtonColor: "#fb6f92"
         });
@@ -320,7 +320,7 @@ function resetUploadForm() {
     els.previewImg.hidden = true;
     els.previewImg.removeAttribute("src");
     els.uploadContent.style.opacity = "1";
-    els.uploadContent.querySelector("strong").textContent = "사진을 선택하거나 촬영해주세요!";
+    els.uploadContent.querySelector("strong").textContent = "촬영한 사진을 업로드해주세요";
 }
 
 async function verifyAdmin() {
