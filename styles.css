@@ -44,7 +44,11 @@ button {
 
 body.page-home {
     font-family: 'Gowun Dodum', sans-serif;
-    background: linear-gradient(135deg, #fce4ec 0%, #e8d5f5 40%, #d4e8f5 100%);
+    background:
+        linear-gradient(135deg, rgba(255, 244, 249, 0.92) 0%, rgba(244, 238, 255, 0.94) 54%, rgba(238, 248, 255, 0.92) 100%),
+        radial-gradient(circle at top left, rgba(255, 182, 193, 0.34), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(252, 211, 77, 0.22), transparent 32%);
+    color: #5f224f;
 }
 
 body.page-upload {
@@ -108,28 +112,52 @@ body.page-admin {
     position: relative;
     z-index: 1;
     min-height: 100vh;
-    padding: 3rem 0;
+    padding: 2rem 0;
 }
 
 .home-container {
     text-align: center;
     padding: 2rem;
     margin: auto;
-    min-height: calc(100vh - 6rem);
+    min-height: calc(100vh - 4rem);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
+.home-panel {
+    width: min(1080px, 100%);
+    padding: clamp(2rem, 5vw, 4rem);
+    background: rgba(255, 255, 255, 0.78);
+    border: 2px solid rgba(255, 190, 210, 0.72);
+    border-radius: 42px;
+    box-shadow: 0 28px 70px rgba(139, 92, 126, 0.18);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
 .home-header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+}
+
+.home-kicker {
+    display: inline-block;
+    margin-bottom: 0.9rem;
+    padding: 0.4rem 1.25rem;
+    border-radius: 999px;
+    background: #ffe4ec;
+    color: #db2777;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.02rem;
+    letter-spacing: 0.03em;
+    box-shadow: inset 0 0 0 1px rgba(251, 113, 133, 0.14);
 }
 
 .emoji-big {
-    font-size: 4rem;
+    font-size: 3.8rem;
     display: block;
-    margin-bottom: 1rem;
+    margin-bottom: 0.65rem;
     animation: bounce 2s ease-in-out infinite;
 }
 
@@ -145,81 +173,96 @@ body.page-admin {
 
 .home-header h1 {
     font-family: 'Jua', sans-serif;
-    font-size: 2.8rem;
-    color: var(--home-pink);
-    text-shadow: 0 2px 8px rgba(190, 24, 93, 0.15);
+    font-size: clamp(2.6rem, 6vw, 4.9rem);
+    color: #5f224f;
+    text-shadow: 0 12px 28px rgba(190, 24, 93, 0.12);
     margin-bottom: 0.5rem;
     letter-spacing: 0;
+    line-height: 1;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    color: #9333ea;
-    opacity: 0.85;
-    margin-bottom: 0.3rem;
+    font-size: clamp(1.1rem, 2.3vw, 1.55rem);
+    color: #7e3f68;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+    line-height: 1.45;
 }
 
 .badge {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    padding: 0.3rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    color: #7c3aed;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(251, 113, 133, 0.24);
+    padding: 0.45rem 1.15rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    color: #8b4370;
+    font-weight: 700;
     margin-top: 0.5rem;
 }
 
 .cards {
-    display: flex;
-    gap: 2rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(250px, 1fr));
+    gap: 1.25rem;
     justify-content: center;
-    flex-wrap: wrap;
+    width: min(760px, 100%);
+    margin: 0 auto;
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-radius: 28px;
-    padding: 2.5rem 2rem;
-    width: 280px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    padding: 1.55rem 1.35rem 1.35rem;
+    min-height: 350px;
     text-decoration: none;
     color: inherit;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 16px 36px rgba(139, 92, 126, 0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
+}
+
+.card-user {
+    background: linear-gradient(180deg, rgba(255, 247, 251, 0.96), rgba(255, 237, 244, 0.92));
+}
+
+.card-admin {
+    background: linear-gradient(180deg, rgba(250, 247, 255, 0.96), rgba(241, 234, 255, 0.92));
 }
 
 .card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px);
+    border-color: rgba(255, 190, 210, 0.9);
+    box-shadow: 0 24px 48px rgba(139, 92, 126, 0.2);
 }
 
 .card-title {
     font-family: 'Jua', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.65rem;
     margin-bottom: 0.6rem;
+    line-height: 1.1;
 }
 
 .card-desc {
-    font-size: 0.9rem;
-    color: #666;
-    line-height: 1.6;
+    min-height: 4.8rem;
+    font-size: 0.95rem;
+    color: #7a556b;
+    line-height: 1.55;
     margin-bottom: 1.2rem;
+    font-weight: 700;
 }
 
 .card-btn {
     display: inline-block;
     margin-top: auto;
-    padding: 0.6rem 1.5rem;
-    border-radius: 20px;
+    padding: 0.72rem 1.7rem;
+    border-radius: 999px;
     font-family: 'Jua', sans-serif;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     transition: transform 0.2s;
 }
 
@@ -248,10 +291,10 @@ body.page-admin {
 }
 
 .card-img {
-    width: 140px;
-    height: 140px;
+    width: 172px;
+    height: 158px;
     object-fit: contain;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.65rem;
     display: block;
     animation: float-img 3s ease-in-out infinite alternate;
 }
@@ -266,9 +309,10 @@ body.page-admin {
 }
 
 .footer {
-    margin-top: 3rem;
-    font-size: 0.8rem;
-    color: rgba(100, 50, 100, 0.5);
+    margin-top: 2rem;
+    font-size: 0.88rem;
+    color: rgba(95, 34, 79, 0.55);
+    font-weight: 700;
 }
 
 .watermark {
@@ -906,8 +950,19 @@ body.page-upload .nav-btn {
         padding: 1.5rem;
     }
 
+    .home-panel {
+        border-radius: 32px;
+        padding: 2rem 1.4rem;
+    }
+
     .cards {
+        grid-template-columns: 1fr;
         gap: 1rem;
+        width: min(360px, 100%);
+    }
+
+    .card {
+        min-height: auto;
     }
 
     .admin-screen {
@@ -950,12 +1005,33 @@ body.page-upload .nav-btn {
 
 @media (max-width: 480px) {
     .home-header h1 {
-        font-size: 2.3rem;
+        font-size: 2.6rem;
+    }
+
+    .home-kicker {
+        font-size: 0.92rem;
+    }
+
+    .emoji-big {
+        font-size: 3rem;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
     }
 
     .card {
-        width: min(280px, 100%);
-        padding: 2rem 1.5rem;
+        width: 100%;
+        padding: 1.35rem 1.15rem;
+    }
+
+    .card-img {
+        width: 148px;
+        height: 132px;
+    }
+
+    .card-desc {
+        min-height: 0;
     }
 
     .upload-container {
